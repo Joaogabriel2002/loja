@@ -32,7 +32,7 @@
         }
 
         public function login(){
-            $sql = "select id from usuario where email = :email and senha = :senha";
+            $sql = "select id from usuarios where email = :email and senha = :senha";
             $stmt = $this->conn->prepare($sql);
             $stmt->bindParam(':email', $this->email);
             $stmt->bindParam(':senha', $this->senha);
