@@ -28,8 +28,8 @@ $email = htmlspecialchars($_SESSION['usuario']);
             <button onclick="window.location.href='EntradaSaida/entradasaida.php'"class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Entrada/Saída</button>
             <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Estoque</button>
             <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Relatórios</button>
-            <a href="../dashboard.php" 
-           class="inline-block bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition">
+            <a href="../App/Controller/logoff.php" 
+           class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
            Logoff
         </a>
         </div>
