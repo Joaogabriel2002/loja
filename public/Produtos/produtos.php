@@ -21,18 +21,19 @@ $email = htmlspecialchars($_SESSION['usuario']);
 <body class="bg-gray-100 min-h-screen flex items-center justify-center font-sans">
 
     <div class="bg-white p-8 rounded shadow-md w-full max-w-md text-center">
-        <h2 class="text-2xl font-bold mb-4">Opções</h2>
+        <h2 class="text-2xl font-bold mb-4">Produtos</h2>
         <p class="text-gray-500 mb-6">Escolha uma ação:</p>
 
         <div class="flex flex-col gap-3">
-            <button onclick="window.location.href='EntradaSaida/entradasaida.php'"class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Entrada/Saída</button>
-            <button onclick="window.location.href='Produtos/produtos.php'" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Produtos</button>
-            <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Relatórios</button>
-            <a href="../App/Controller/logoff.php" 
-           class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
-           Logoff
+            <button onclick="window.location.href='CadastrarProdutos.php'" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Cadastrar Produtos</button>
+            <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Visualizar Estoque  </button>
+            <!-- <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Realizar Baixa</button> -->
+            <a href="../dashboard.php" 
+           class="inline-block bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition">
+           ← Voltar
         </a>
         </div>
+        
     </div>
     <!-- Informações do Usuario -->
         <!-- <div class="bg-white p-8 rounded shadow-md w-1/2 text-center">
@@ -41,7 +42,7 @@ $email = htmlspecialchars($_SESSION['usuario']);
             <p class="text-blue-600 font-semibold text-lg mb-6"><?= $email ?></p>
             <a href="logout.php" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">Sair</a>
         </div> -->
-
+    
 </body>
 
 

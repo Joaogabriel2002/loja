@@ -77,4 +77,6 @@ class Produto {
     public function getIdFornecedor(){
         return $this->id_fornecedor;
     }
+
+    
 }
