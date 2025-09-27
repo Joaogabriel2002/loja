@@ -103,7 +103,7 @@ if (isset($_GET['status']) && isset($_GET['msg'])) {
             </div>
 
             <div class="flex justify-center gap-4">
-                 <button type="button" onclick="window.location.href='produtos.php'" class="w-full md:w-1/3 bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 transition duration-300">
+                 <button type="button" onclick="window.location.href='../dashboard.php'" class="w-full md:w-1/3 bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 transition duration-300">
                     Voltar
                 </button>
                 <button type="button" onclick="window.location.href='CadastrarProdutos.php'" class="w-full md:w-1/3 bg-gray-400 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-500 transition duration-300">

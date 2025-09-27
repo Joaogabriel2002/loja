@@ -43,7 +43,7 @@ $caminhoBaseImagem = '../uploads/produtos/';
         <div class="container mx-auto px-6 py-3 flex justify-between items-center">
             <div class="text-xl font-bold text-gray-800">Meu Estoque</div>
             <div>
-                 <a href="../../dashboard.php" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded">Dashboard</a>
+                 <a href="..\dashboard.php" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded">Dashboard</a>
                  <!-- Adicione outros links de navegação aqui -->
             </div>
         </div>
@@ -54,9 +54,9 @@ $caminhoBaseImagem = '../uploads/produtos/';
 
         <!-- Botão Voltar e Mensagens de Feedback -->
         <div class="mb-6">
-            <a href="../../dashboard.php" class="inline-flex items-center text-gray-600 hover:text-gray-900 font-semibold transition-colors duration-300">
+            <a href="../dashboard.php" class="inline-flex items-center text-gray-600 hover:text-gray-900 font-semibold transition-colors duration-300">
                 <i class="fas fa-arrow-left mr-2"></i>
-                Voltar ao Dashboard
+                Voltar 
             </a>
         </div>
         
