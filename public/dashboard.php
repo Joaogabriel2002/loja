@@ -2,106 +2,96 @@
 session_start();
 
 // Redireciona se não estiver logado
-if (!isset($_SESSION['usuario_id'])) {
-    // Altere para o caminho correto da sua página de login
-    header('Location: login.php'); 
-    exit();
-}
+// if (!isset($_SESSION['usuario_id'])) {
+//     header('Location: index.php');
+//     exit();
+// }
 
-// Pega o e-mail da sessão para a mensagem de boas-vindas
-$email = htmlspecialchars($_SESSION['usuario']);
+// $email = htmlspecialchars($_SESSION['usuario'] ?? 'Visitante');
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Meu Estoque</title>
+    <title>Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 font-sans">
 
-    <!-- Navbar -->
-    <nav class="bg-white shadow-md">
-        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
-            <div class="text-xl font-bold text-gray-800">
-                <i class="fas fa-cubes mr-2"></i>Meu Estoque
-            </div>
-            <div class="flex items-center">
-                 <span class="text-gray-600 text-sm mr-4 hidden md:block">Logado como: <strong><?php echo $email; ?></strong></span>
-                 <a href="logout.php" class="text-gray-600 hover:text-red-600 px-3 py-2 rounded transition-colors duration-300" title="Sair">
-                    <i class="fas fa-sign-out-alt fa-lg"></i>
-                 </a>
-            </div>
-        </div>
-    </nav>
-
     <!-- Conteúdo Principal -->
-    <main class="container mx-auto p-4 md:p-8">
-        
-        <!-- Cabeçalho de Boas-vindas -->
-        <header class="mb-10">
-            <h1 class="text-4xl font-bold text-gray-800">Bem-vindo(a) de volta!</h1>
-            <p class="text-lg text-gray-500 mt-2">Selecione uma das opções abaixo para começar a gerenciar seu negócio.</p>
+    <div class="min-h-screen flex flex-col">
+        <!-- Cabeçalho -->
+        <header class="bg-white shadow-md p-4">
+            <div class="container mx-auto flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+                <div>
+                    <button onclick="history.back()" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-lg transition-colors duration-300" title="Voltar">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </button>
+                    <!-- <a href="logout.php" class="ml-4 text-red-500 hover:text-red-700">Sair</a> -->
+                </div>
+            </div>
         </header>
 
-        <!-- Grid de Cards de Ação -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Corpo do Dashboard -->
+        <main class="flex-grow container mx-auto p-4 md:p-8">
+            <div class="text-left mb-10">
+                <h2 class="text-3xl font-semibold text-gray-700">Bem-vindo(a) ao seu Painel!</h2>
+                <p class="text-gray-500 mt-2">Selecione uma das opções abaixo para começar a gerir o seu negócio.</p>
+            </div>
 
-            <!-- Card de Produtos -->
-            <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300">
-                <div class="flex items-center mb-4">
-                    <div class="bg-blue-100 text-blue-600 p-3 rounded-full mr-4">
-                        <i class="fas fa-box-open fa-2x"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-800">Produtos</h2>
-                </div>
-                <p class="text-gray-600 mb-6">Gerencie seu inventário, adicione novos itens e veja o que está em estoque.</p>
-                <div class="flex flex-col gap-3">
-                    <a href="Produtos/CadastrarProdutos.php" class="w-full text-center bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition">
-                        <i class="fas fa-plus mr-2"></i>Cadastrar Novo
+            <!-- Grid de Cards de Ação -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+
+                <!-- Card: Realizar Venda (PDV) -->
+                <div class="group bg-white rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:-translate-y-2 overflow-hidden">
+                    <a href="Vendas/FrenteCaixa.php" class="block p-8">
+                         <div class="flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 text-purple-600 mb-6 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
+                            <i class="fas fa-cash-register fa-2x"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Frente de Caixa (PDV)</h3>
+                        <p class="text-gray-600">Inicie uma nova venda, adicione produtos e finalize o pagamento.</p>
                     </a>
-                    <a href="Produtos/ListarProdutos.php" class="w-full text-center bg-gray-200 text-gray-800 font-semibold py-3 px-4 rounded-lg hover:bg-gray-300 transition">
-                        <i class="fas fa-list mr-2"></i>Visualizar Estoque
+                </div>
+
+                <!-- Card: Gerir Produtos -->
+                <div class="group bg-white rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:-translate-y-2 overflow-hidden">
+                    <a href="Produtos/ListarProdutos.php" class="block p-8">
+                        <div class="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                            <i class="fas fa-box-open fa-2x"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Gerir Produtos</h3>
+                        <p class="text-gray-600">Visualize, adicione, edite e remova produtos do seu inventário.</p>
                     </a>
                 </div>
-            </div>
-
-            <!-- Card de Vendas (Exemplo para o futuro) -->
-            <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 opacity-50 cursor-not-allowed">
-                 <div class="flex items-center mb-4">
-                    <div class="bg-green-100 text-green-600 p-3 rounded-full mr-4">
-                        <i class="fas fa-cash-register fa-2x"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-800">Vendas</h2>
+                
+                <!-- Card: Movimentação de Estoque -->
+                <div class="group bg-white rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:-translate-y-2 overflow-hidden">
+                    <a href="Relatorios/MovimentacaoEstoque.php" class="block p-8">
+                        <div class="flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 text-yellow-600 mb-6 group-hover:bg-yellow-600 group-hover:text-white transition-colors duration-300">
+                            <i class="fas fa-exchange-alt fa-2x"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Movimentação de Estoque</h3>
+                        <p class="text-gray-600">Acompanhe o extrato completo de todas as entradas e saídas.</p>
+                    </a>
                 </div>
-                <p class="text-gray-600 mb-6">Registre novas vendas e consulte o histórico de transações. (Em breve)</p>
-                 <div class="flex flex-col gap-3">
-                    <span class="w-full text-center bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg">
-                        <i class="fas fa-dollar-sign mr-2"></i>Nova Venda
-                    </span>
-                 </div>
-            </div>
 
-            <!-- Card de Relatórios (Exemplo para o futuro) -->
-             <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 opacity-50 cursor-not-allowed">
-                 <div class="flex items-center mb-4">
-                    <div class="bg-purple-100 text-purple-600 p-3 rounded-full mr-4">
-                        <i class="fas fa-chart-line fa-2x"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-800">Relatórios</h2>
+                <!-- Card: Histórico de Vendas -->
+                <div class="group bg-white rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 transform hover:-translate-y-2 overflow-hidden">
+                    <a href="Relatorios/HistoricoVendas.php" class="block p-8">
+                        <div class="flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-600 mb-6 group-hover:bg-green-600 group-hover:text-white transition-colors duration-300">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Histórico de Vendas</h3>
+                        <p class="text-gray-600">Consulte o relatório detalhado de todas as saídas por venda.</p>
+                    </a>
                 </div>
-                <p class="text-gray-600 mb-6">Analise o desempenho do seu negócio com gráficos e dados. (Em breve)</p>
-                 <div class="flex flex-col gap-3">
-                    <span class="w-full text-center bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg">
-                        <i class="fas fa-file-alt mr-2"></i>Ver Relatórios
-                    </span>
-                 </div>
-            </div>
 
-        </div>
-    </main>
+            </div>
+        </main>
+    </div>
 
 </body>
 </html>
+
