@@ -10,8 +10,12 @@ class Produto {
     private $preco_venda;
     private $quantidade_estoque;
     private $id_categoria;
+    // Novos atributos para as imagens
+    private $imagem1;
+    private $imagem2;
+    private $imagem3;
 
-    // --- Getters e Setters (mesmos de antes) ---
+    // --- Getters e Setters ---
     public function getId() { return $this->id; }
     public function setId($id) { $this->id = $id; }
     public function getNome() { return $this->nome; }
@@ -27,36 +31,44 @@ class Produto {
     public function getIdCategoria() { return $this->id_categoria; }
     public function setIdCategoria($id_categoria) { $this->id_categoria = $id_categoria; }
 
+    // Getters e Setters para as novas imagens
+    public function getImagem1() { return $this->imagem1; }
+    public function setImagem1($imagem1) { $this->imagem1 = $imagem1; }
+    public function getImagem2() { return $this->imagem2; }
+    public function setImagem2($imagem2) { $this->imagem2 = $imagem2; }
+    public function getImagem3() { return $this->imagem3; }
+    public function setImagem3($imagem3) { $this->imagem3 = $imagem3; }
+
+
     /**
-     * Salva o produto atual no banco de dados.
-     * Inclui a inserção na tabela 'produtos' e o registro inicial na 'movimentacao_estoque'.
-     *
-     * @param PDO $pdo A instância da conexão com o banco de dados.
-     * @return bool Retorna true em caso de sucesso, ou lança uma exceção em caso de erro.
+     * Salva o produto atual no banco de dados, incluindo as imagens.
      */
     public function salvar($pdo) {
         try {
             $pdo->beginTransaction();
 
-            $sqlProduto = "INSERT INTO produtos (nome, descricao, preco_custo, preco_venda, quantidade_estoque, id_categoria) 
-                           VALUES (:nome, :descricao, :preco_custo, :preco_venda, :quantidade_estoque, :id_categoria)";
+            // SQL ATUALIZADO: Inclui as colunas de imagem
+            $sqlProduto = "INSERT INTO produtos (nome, descricao, preco_custo, preco_venda, quantidade_estoque, imagem1, imagem2, imagem3) 
+                           VALUES (:nome, :descricao, :preco_custo, :preco_venda, :quantidade_estoque, :imagem1, :imagem2, :imagem3)";
             
             $stmtProduto = $pdo->prepare($sqlProduto);
 
+            // EXECUTE ATUALIZADO: Passa os nomes dos arquivos das imagens
             $stmtProduto->execute([
                 ':nome' => $this->getNome(),
                 ':descricao' => $this->getDescricao(),
                 ':preco_custo' => $this->getPrecoCusto(),
                 ':preco_venda' => $this->getPrecoVenda(),
                 ':quantidade_estoque' => $this->getQuantidadeEstoque(),
-                ':id_categoria' => $this->getIdCategoria()
+                // ':id_categoria' => $this->getIdCategoria(),
+                ':imagem1' => $this->getImagem1(),
+                ':imagem2' => $this->getImagem2(),
+                ':imagem3' => $this->getImagem3()
             ]);
 
             $id_produto_inserido = $pdo->lastInsertId();
 
             if ($this->getQuantidadeEstoque() > 0) {
-                // --- CORREÇÃO AQUI ---
-                // Alterado 'motivo' para 'observacao' para corresponder ao banco de dados
                 $sqlMovimentacao = "INSERT INTO movimentacao_estoque (id_produto, tipo_movimentacao, quantidade, observacao) 
                                     VALUES (:id_produto, 'ENTRADA', :quantidade, 'Cadastro Inicial do Produto')";
                 
