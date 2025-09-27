@@ -29,7 +29,7 @@ session_start();
             <div class="relative mb-6">
                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 <input type="text" id="searchProduto" placeholder="Digite o nome do produto para adicionar ao carrinho..."
-                    class="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg">
+                       class="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg">
                 <div id="searchResults" class="absolute z-10 w-full bg-white border rounded-lg mt-1 shadow-lg hidden max-h-60 overflow-y-auto"></div>
             </div>
 
@@ -79,7 +79,7 @@ session_start();
 
             <div class="mt-6">
                 <button id="finalizeVendaBtn"
-                    class="w-full bg-green-600 text-white font-bold py-4 rounded-lg text-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        class="w-full bg-green-600 text-white font-bold py-4 rounded-lg text-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
                     <i class="fas fa-check-circle mr-2"></i> Finalizar Venda
                 </button>
             </div>
@@ -155,10 +155,14 @@ session_start();
                 if(existingItem.quantidade < product.quantidade_estoque){
                     existingItem.quantidade++;
                 } else {
-                    alert('Quantidade máxima em estoque atingida.');
+                    showModal('error', 'Erro de Estoque', 'Quantidade máxima em estoque atingida.');
                 }
             } else {
-                cart.push({ ...product, quantidade: 1 });
+                if (product.quantidade_estoque > 0) {
+                    cart.push({ ...product, quantidade: 1 });
+                } else {
+                    showModal('error', 'Erro de Estoque', 'Este produto está fora de estoque.');
+                }
             }
             renderCart();
         }
@@ -177,13 +181,13 @@ session_start();
                         <td class="py-4 px-6">${item.nome}</td>
                         <td class="py-4 px-6 text-center">
                             <div class="flex items-center justify-center">
-                                <button onclick="updateQuantity(${index}, -1)" class="px-2 py-1 bg-gray-200 rounded-l">-</button>
-                                <input type="number" value="${item.quantidade}" class="w-16 text-center border-t border-b" readonly>
-                                <button onclick="updateQuantity(${index}, 1)" class="px-2 py-1 bg-gray-200 rounded-r">+</button>
+                                <button onclick="updateQuantity(${index}, -1)" class="px-2 py-1 bg-gray-200 rounded-l hover:bg-gray-300">-</button>
+                                <span class="w-16 text-center font-semibold">${item.quantidade}</span>
+                                <button onclick="updateQuantity(${index}, 1)" class="px-2 py-1 bg-gray-200 rounded-r hover:bg-gray-300">+</button>
                             </div>
                         </td>
-                        <td class="py-4 px-6 text-right">R$ ${parseFloat(item.preco_venda).toFixed(2)}</td>
-                        <td class="py-4 px-6 text-right font-semibold">R$ ${subtotal.toFixed(2)}</td>
+                        <td class="py-4 px-6 text-right">R$ ${parseFloat(item.preco_venda).toFixed(2).replace('.', ',')}</td>
+                        <td class="py-4 px-6 text-right font-semibold">R$ ${subtotal.toFixed(2).replace('.', ',')}</td>
                         <td class="py-4 px-6 text-center">
                             <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700"><i class="fas fa-trash-alt"></i></button>
                         </td>
@@ -197,8 +201,8 @@ session_start();
         // Atualizar resumo da venda
         function updateSummary() {
             const total = cart.reduce((sum, item) => sum + (item.quantidade * item.preco_venda), 0);
-            document.getElementById('subtotal').innerText = `R$ ${total.toFixed(2)}`;
-            document.getElementById('total').innerText = `R$ ${total.toFixed(2)}`;
+            document.getElementById('subtotal').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+            document.getElementById('total').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
             finalizeVendaBtn.disabled = cart.length === 0;
         }
 
@@ -210,7 +214,9 @@ session_start();
                 item.quantidade = newQuantity;
                 renderCart();
             } else if(newQuantity > item.quantidade_estoque){
-                alert('Quantidade máxima em estoque atingida.');
+                showModal('error', 'Erro de Estoque', 'Quantidade máxima em estoque atingida.');
+            } else if (newQuantity <= 0) {
+                removeFromCart(index);
             }
         };
 
@@ -224,8 +230,16 @@ session_start();
             if (cart.length === 0) return;
             
             const total = cart.reduce((sum, item) => sum + (item.quantidade * item.preco_venda), 0);
+            
+            // --- CORREÇÃO IMPORTANTE AQUI ---
+            // Adicionamos 'preco_venda: item.preco_venda' para garantir que o preço de cada item
+            // é enviado para o backend, resolvendo o erro.
             const dataToSend = {
-                carrinho: cart.map(item => ({ id: item.id, quantidade: item.quantidade })),
+                carrinho: cart.map(item => ({ 
+                    id: item.id, 
+                    quantidade: item.quantidade, 
+                    preco_venda: item.preco_venda 
+                })),
                 total: total
             };
 
