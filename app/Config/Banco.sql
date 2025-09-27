@@ -45,7 +45,7 @@ CREATE TABLE `produtos` (
 CREATE TABLE `movimentacao_estoque` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `id_produto` INT NOT NULL,
-  `data_hora` DATETIME NOT NULL,
+  `data_hora` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `tipo_movimentacao` VARCHAR(50) NOT NULL COMMENT 'Ex: ENTRADA_COMPRA, SAIDA_VENDA, AJUSTE_PERDA',
   `quantidade` INT NOT NULL COMMENT 'Positivo para entradas, negativo para saídas',
   `observacao` TEXT,
@@ -57,7 +57,7 @@ CREATE TABLE `movimentacao_estoque` (
 
 CREATE TABLE `vendas` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `data_hora` DATETIME NOT NULL,
+  `data_hora` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `valor_total` DECIMAL(10, 2) NOT NULL,
   `forma_pagamento` VARCHAR(240),
   `id_usuario` INT NOT NULL,

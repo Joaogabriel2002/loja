@@ -1,3 +1,26 @@
+<?php
+// 1. Inicializamos as variáveis que vão guardar a mensagem e o estilo do alerta
+$mensagem = '';
+$classeAlerta = '';
+
+// 2. Verificamos se a URL contém os parâmetros 'status' e 'msg'
+if (isset($_GET['status']) && isset($_GET['msg'])) {
+    $status = $_GET['status'];
+    // Decodificamos a mensagem que veio na URL para exibir corretamente
+    $msg = urldecode($_GET['msg']);
+
+    // 3. Com base no status, definimos o conteúdo da variável $mensagem e a classe CSS do alerta
+    if ($status === 'sucesso') {
+        $mensagem = $msg;
+        // Classes do Tailwind para um alerta de sucesso (fundo verde)
+        $classeAlerta = 'p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg';
+    } elseif ($status === 'erro') {
+        $mensagem = $msg;
+        // Classes do Tailwind para um alerta de erro (fundo vermelho)
+        $classeAlerta = 'p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg';
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -11,7 +34,16 @@
     <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl">
         <h2 class="text-2xl font-bold mb-6 text-center text-gray-700">Cadastrar Novo Produto</h2>
         
-        <!-- O 'action' agora aponta para o nosso script PHP -->
+        <?php
+        // 4. Se a variável $mensagem não estiver vazia, significa que temos algo para exibir.
+        if (!empty($mensagem)):
+        ?>
+        <div class="<?php echo $classeAlerta; ?>" role="alert">
+            <?php echo htmlspecialchars($mensagem); // Usamos htmlspecialchars por segurança ?>
+        </div>
+        <?php endif; ?>
+
+        <!-- O action aponta para o controller, subindo dois níveis de diretório -->
         <form action="..\..\App\Controller\cadastrar_produto.php" method="POST">
             <div class="mb-4">
                 <label for="nome" class="block text-gray-600 font-medium mb-2">Nome do Produto</label>
@@ -52,7 +84,7 @@
             </div>
 
             <div class="flex justify-center gap-4">
-                <button type="button" onclick="window.location.href='form_cadastro.html'" class="w-full md:w-1/2 bg-gray-400 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-500 transition duration-300">
+                <button type="button" onclick="window.location.href='CadastrarProdutos.php'" class="w-full md:w-1/2 bg-gray-400 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-500 transition duration-300">
                     Limpar
                 </button>
                 <button type="submit" class="w-full md:w-1/2 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-300">
@@ -64,3 +96,4 @@
 
 </body>
 </html>
+

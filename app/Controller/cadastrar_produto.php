@@ -8,14 +8,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     require_once __DIR__ . '/../Config/conexao.php';
     require_once __DIR__ . '/../Models/Produtos.php'; 
 
-    // --- CORREÇÃO AQUI ---
-    // 3. Criamos uma instância da classe de conexão
+    // 3. Criamos a conexão com o banco de dados
     $conexao = new Conexao();
-    // 4. Obtém o objeto PDO para ser usado nas operações
     $pdo = $conexao->getConn();
-    // ---------------------
 
-    // 5. Criamos um objeto Produto e o populamos com os dados do formulário
+    // 4. Criamos um objeto Produto e o populamos com os dados do formulário
     $produto = new Produto();
     $produto->setNome($_POST['nome'] ?? '');
     $produto->setPrecoCusto(!empty($_POST['preco_custo']) ? $_POST['preco_custo'] : null);
@@ -24,26 +21,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // $produto->setIdCategoria(!empty($_POST['id_categoria']) ? $_POST['id_categoria'] : null);
     $produto->setDescricao(!empty($_POST['descricao']) ? $_POST['descricao'] : null);
 
-    // 6. Validação básica
+    // 5. Validação básica
     if (empty($produto->getNome()) || empty($produto->getPrecoVenda()) || $produto->getQuantidadeEstoque() === null) {
-        die("Erro: Campos obrigatórios não foram preenchidos.");
+        $mensagemErro = "Erro: Campos obrigatórios (Nome, Preço de Venda, Estoque) não foram preenchidos.";
+        // Redireciona de volta com a mensagem de erro
+        header("Location: ../../public/Produtos/CadastrarProdutos.php?status=erro&msg=" . urlencode($mensagemErro));
+        exit();
     }
 
     try {
-        // 7. Chamamos o método salvar, passando a conexão PDO como parâmetro
+        // 6. Tentamos salvar o produto
         $produto->salvar($pdo);
 
-        // 8. Se o método salvar() não lançou exceção, o cadastro foi um sucesso
-        header("Location: ../../form_cadastro.html?status=sucesso");
+        // 7. Se deu certo, preparamos a mensagem de sucesso e redirecionamos
+        $mensagemSucesso = "Produto '" . htmlspecialchars($produto->getNome()) . "' cadastrado com sucesso!";
+        header("Location: ../../public/Produtos/CadastrarProdutos.php?status=sucesso&msg=" . urlencode($mensagemSucesso));
         exit();
 
     } catch (Exception $e) {
-        // 9. Se o método salvar() lançou uma exceção, capturamos e exibimos o erro
-        die("Erro ao cadastrar o produto: " . $e->getMessage());
+        // 8. Se deu erro, pegamos a mensagem da exceção e redirecionamos
+        $mensagemErro = "Erro ao cadastrar o produto: " . $e->getMessage();
+        header("Location: ../../public/Produtos/CadastrarProdutos.php?status=erro&msg=" . urlencode($mensagemErro));
+        exit();
     }
 } else {
     // Se o acesso não for via POST, redireciona para o formulário
-    header("Location: ../../form_cadastro.html");
+    header("Location: ../../public/Produtos/CadastrarProdutos.php");
     exit();
 }
 
