@@ -120,7 +120,7 @@ try {
 
                                 $lucroPorItem = $precoVenda - $precoCusto;
                                 $lucroTotalLinha = $lucroPorItem * $quantidade;
-                                $margem = ($precoVenda > 0) ? ($lucroPorItem / $precoVenda) * 100 : 0;
+                                $margem = ($precoCusto > 0) ? ($lucroPorItem / $precoCusto) * 100 : 0;
 
                                 $lucroTotalGeral += $lucroTotalLinha; // Acumula o lucro
                             ?>
