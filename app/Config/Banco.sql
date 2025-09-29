@@ -39,8 +39,9 @@ CREATE TABLE `produtos` (
   `preco_venda` DECIMAL(10, 2) NOT NULL,
   `quantidade_estoque` INT NOT NULL DEFAULT 0,
   `id_categoria` INT,
-  FOREIGN KEY (`id_categoria`) REFERENCES `categorias`(`id`),
-) COMMENT='Tabela principal de produtos.';
+  `imagem1` VARCHAR(255) NULL, -- Armazena o nome do ficheiro da imagem principal
+  `imagem2` VARCHAR(255) NULL, -- Armazena o nome do ficheiro da imagem secundária
+  `imagem3` VARCHAR(255) NULL, -- Armazena o nome do ficheiro da imagem terciária
 
 CREATE TABLE `movimentacao_estoque` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
