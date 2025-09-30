@@ -6,9 +6,13 @@ require_once __DIR__ . '/../../App/Models/Venda.php';
 $conexao = new Conexao();
 $pdo = $conexao->getConn();
 
+// 1. Verificamos o filtro de período selecionado na URL
+$periodo = $_GET['periodo'] ?? 'sempre';
+
+// 2. Buscamos a lista de pedidos, aplicando o filtro
 $pedidos = [];
 try {
-    $pedidos = Venda::listarTodas($pdo);
+    $pedidos = Venda::listarTodas($pdo, $periodo);
 } catch (Exception $e) {
     $erro = "Não foi possível carregar o histórico de pedidos.";
     error_log($e->getMessage());
@@ -37,9 +41,23 @@ try {
                 <i class="fas fa-arrow-left mr-2"></i>Voltar
             </a>
         </div>
-        <header class="mb-8">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-4">
             <h1 class="text-3xl font-bold text-gray-800">Histórico de Pedidos</h1>
         </header>
+
+        <!-- Barra de Filtros de Período -->
+        <div class="mb-8 flex flex-wrap gap-2">
+            <a href="?periodo=hoje" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 <?php echo ($periodo === 'hoje' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100 border'); ?>">Hoje</a>
+            <a href="?periodo=semana" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 <?php echo ($periodo === 'semana' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100 border'); ?>">Esta Semana</a>
+            <a href="?periodo=mes" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 <?php echo ($periodo === 'mes' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100 border'); ?>">Este Mês</a>
+            <a href="?periodo=sempre" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 <?php echo ($periodo === 'sempre' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100 border'); ?>">Sempre</a>
+        </div>
+
+        <?php if (isset($erro)): ?>
+        <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+            <?php echo htmlspecialchars($erro); ?>
+        </div>
+        <?php endif; ?>
 
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
             <div class="overflow-x-auto">
@@ -55,7 +73,14 @@ try {
                     </thead>
                     <tbody>
                         <?php if (empty($pedidos)): ?>
-                            <tr><td colspan="5" class="text-center py-10">Nenhum pedido encontrado.</td></tr>
+                            <tr>
+                                <td colspan="5" class="text-center py-10 px-5">
+                                    <div class="flex flex-col items-center">
+                                        <i class="fas fa-receipt fa-3x text-gray-400 mb-4"></i>
+                                        <p class="text-gray-700 font-semibold">Nenhum pedido encontrado para este período.</p>
+                                    </div>
+                                </td>
+                            </tr>
                         <?php else: ?>
                             <?php foreach ($pedidos as $pedido): ?>
                                 <tr class="border-b border-gray-200 hover:bg-gray-50">
@@ -128,3 +153,4 @@ try {
     </script>
 </body>
 </html>
+

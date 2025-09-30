@@ -61,12 +61,12 @@ if (isset($_GET['status']) && isset($_GET['msg'])) {
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label for="quantidade_estoque" class="block text-gray-600 font-medium mb-2">Quantidade em Estoque</label>
                     <input type="number" id="quantidade_estoque" name="quantidade_estoque" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ex: 50" required>
                 </div>
-            </div>
+            </div> -->
 
             <div class="mb-4">
                 <label for="id_categoria" class="block text-gray-600 font-medium mb-2">Categoria</label>
@@ -103,7 +103,7 @@ if (isset($_GET['status']) && isset($_GET['msg'])) {
             </div>
 
             <div class="flex justify-center gap-4">
-                 <button type="button" onclick="window.location.href='../dashboard.php'" class="w-full md:w-1/3 bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 transition duration-300">
+                 <button type="button" onclick="window.location.href='ListarProdutos.php'" class="w-full md:w-1/3 bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 transition duration-300">
                     Voltar
                 </button>
                 <button type="button" onclick="window.location.href='CadastrarProdutos.php'" class="w-full md:w-1/3 bg-gray-400 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-500 transition duration-300">

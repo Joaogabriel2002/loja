@@ -2,17 +2,20 @@
 session_start();
 
 // 1. Incluímos os ficheiros essenciais
-require_once __DIR__ . '/../../App/Config/conexao.php';
+require_once __DIR__ . '/../../App/Config/Conexao.php';
 require_once __DIR__ . '/../../App/Models/Movimentacao.php';
 
 // 2. Criamos a conexão com o banco
 $conexao = new Conexao();
 $pdo = $conexao->getConn();
 
-// 3. Buscamos a lista de todas as movimentações
+// 3. Verificamos o filtro de período selecionado na URL
+$periodo = $_GET['periodo'] ?? 'sempre';
+
+// 4. Buscamos a lista de movimentações aplicando o filtro
 $movimentacoes = [];
 try {
-    $movimentacoes = Movimentacao::listarTodasMovimentacoes($pdo);
+    $movimentacoes = Movimentacao::listarTodasMovimentacoes($pdo, $periodo);
 } catch (Exception $e) {
     $erro = "Não foi possível carregar as movimentações de estoque.";
     error_log($e->getMessage());
@@ -50,9 +53,17 @@ try {
             </a>
         </div>
 
-        <header class="flex flex-col md:flex-row justify-between items-center mb-8">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-4">
             <h1 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Movimentação de Estoque</h1>
         </header>
+
+        <!-- Barra de Filtros de Período -->
+        <div class="mb-8 flex flex-wrap gap-2">
+            <a href="?periodo=hoje" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 <?php echo ($periodo === 'hoje' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100 border'); ?>">Hoje</a>
+            <a href="?periodo=semana" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 <?php echo ($periodo === 'semana' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100 border'); ?>">Esta Semana</a>
+            <a href="?periodo=mes" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 <?php echo ($periodo === 'mes' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100 border'); ?>">Este Mês</a>
+            <a href="?periodo=sempre" class="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 <?php echo ($periodo === 'sempre' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100 border'); ?>">Sempre</a>
+        </div>
 
         <?php if (isset($erro)): ?>
             <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
@@ -79,7 +90,7 @@ try {
                                 <td colspan="5" class="text-center py-10 px-5">
                                     <div class="flex flex-col items-center">
                                         <i class="fas fa-history fa-3x text-gray-400 mb-4"></i>
-                                        <p class="text-gray-700 font-semibold">Nenhuma movimentação encontrada.</p>
+                                        <p class="text-gray-700 font-semibold">Nenhuma movimentação encontrada para este período.</p>
                                         <p class="text-gray-500 text-sm">Entradas e saídas de estoque aparecerão aqui.</p>
                                     </div>
                                 </td>
@@ -122,3 +133,4 @@ try {
 
 </body>
 </html>
+

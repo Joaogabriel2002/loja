@@ -1,9 +1,10 @@
 <?php
 // Ficheiro: App/Models/Produtos.php
+// Versão simplificada, sem o sistema de variações.
 
 class Produto
 {
-    // Atributos
+    // Atributos do produto único
     private $id;
     private $nome;
     private $descricao;
@@ -37,14 +38,18 @@ class Produto
     public function getImagem3() { return $this->imagem3; }
     public function setImagem3($imagem3) { $this->imagem3 = $imagem3; }
 
-    // --- Métodos de Banco de Dados ---
-
-    public function salvar(PDO $pdo) {
+    /**
+     * Salva o produto no banco de dados e regista a movimentação inicial.
+     */
+    public function salvar(PDO $pdo)
+    {
         try {
-            $sql = "INSERT INTO produtos (nome, descricao, preco_custo, preco_venda, quantidade_estoque, id_categoria, imagem1, imagem2, imagem3) 
-                    VALUES (:nome, :descricao, :preco_custo, :preco_venda, :quantidade_estoque, :id_categoria, :imagem1, :imagem2, :imagem3)";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
+            $pdo->beginTransaction();
+
+            $sqlProduto = "INSERT INTO produtos (nome, descricao, preco_custo, preco_venda, quantidade_estoque, id_categoria, imagem1, imagem2, imagem3) 
+                           VALUES (:nome, :descricao, :preco_custo, :preco_venda, :quantidade_estoque, :id_categoria, :imagem1, :imagem2, :imagem3)";
+            $stmtProduto = $pdo->prepare($sqlProduto);
+            $stmtProduto->execute([
                 ':nome' => $this->getNome(),
                 ':descricao' => $this->getDescricao(),
                 ':preco_custo' => $this->getPrecoCusto(),
@@ -55,27 +60,41 @@ class Produto
                 ':imagem2' => $this->getImagem2(),
                 ':imagem3' => $this->getImagem3()
             ]);
-            $this->id = $pdo->lastInsertId();
+            $idProdutoInserido = $pdo->lastInsertId();
+
+            if ($this->getQuantidadeEstoque() > 0) {
+                $sqlMov = "INSERT INTO movimentacao_estoque (id_produto, tipo_movimentacao, quantidade, observacao) 
+                           VALUES (:id_produto, 'ENTRADA', :quantidade, 'Cadastro Inicial do Produto')";
+                $stmtMov = $pdo->prepare($sqlMov);
+                $stmtMov->execute([':id_produto' => $idProdutoInserido, ':quantidade' => $this->getQuantidadeEstoque()]);
+            }
+
+            $pdo->commit();
             return true;
-        } catch (PDOException $e) {
-            error_log($e->getMessage());
-            throw new Exception("Erro ao salvar o produto.");
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            throw new Exception("Erro ao salvar o produto: " . $e->getMessage());
         }
     }
 
-    public function atualizar(PDO $pdo) {
+    /**
+     * Atualiza o produto no banco de dados.
+     */
+    public function atualizar(PDO $pdo)
+    {
         try {
-            $sql = "UPDATE produtos SET 
-                        nome = :nome, 
-                        descricao = :descricao, 
-                        preco_custo = :preco_custo, 
-                        preco_venda = :preco_venda, 
-                        quantidade_estoque = :quantidade_estoque, 
+            $sql = "UPDATE produtos SET
+                        nome = :nome,
+                        descricao = :descricao,
+                        preco_custo = :preco_custo,
+                        preco_venda = :preco_venda,
+                        quantidade_estoque = :quantidade_estoque,
                         id_categoria = :id_categoria,
                         imagem1 = :imagem1,
                         imagem2 = :imagem2,
                         imagem3 = :imagem3
                     WHERE id = :id";
+            
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 ':nome' => $this->getNome(),
@@ -89,76 +108,126 @@ class Produto
                 ':imagem3' => $this->getImagem3(),
                 ':id' => $this->getId()
             ]);
+            
             return true;
-        } catch (PDOException $e) {
-            error_log($e->getMessage());
-            throw new Exception("Erro ao atualizar o produto.");
+
+        } catch (Exception $e) {
+            throw new Exception("Erro ao atualizar o produto: " . $e->getMessage());
         }
     }
 
-    public static function listarTodos(PDO $pdo): array {
-        $stmt = $pdo->query("SELECT * FROM produtos ORDER BY nome ASC");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    // --- MÉTODOS ESTÁTICOS ---
 
-    public static function findById(PDO $pdo, int $id): ?array {
-        $stmt = $pdo->prepare("SELECT * FROM produtos WHERE id = ?");
-        $stmt->execute([$id]);
-        $produto = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $produto ?: null;
-    }
-    
-    public static function buscarPorTermo(PDO $pdo, string $termo): array {
-        $stmt = $pdo->prepare("SELECT id, nome, preco_venda, quantidade_estoque FROM produtos WHERE nome LIKE ? AND quantidade_estoque > 0 LIMIT 10");
-        $stmt->execute(['%' . $termo . '%']);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function excluir(PDO $pdo): bool {
-        try {
-            $stmt = $pdo->prepare("DELETE FROM produtos WHERE id = ?");
-            $stmt->execute([$this->id]);
-            return $stmt->rowCount() > 0;
-        } catch (PDOException $e) {
-            error_log($e->getMessage());
-            // Verifica se o erro é de restrição de chave estrangeira
-            if ($e->getCode() == '23000') {
-                throw new Exception("Não é possível excluir este produto, pois ele está associado a outros registos (ex: vendas).");
-            }
-            throw new Exception("Erro ao excluir o produto.");
-        }
-    }
-
-    public static function adicionarEstoque(PDO $pdo, int $idProduto, int $quantidade, string $motivo): bool
+    /**
+     * Exclui um produto e as suas imagens, com todas as validações.
+     */
+    public static function excluir(PDO $pdo, int $id): string
     {
-        if ($quantidade <= 0) {
-            throw new Exception("A quantidade a ser adicionada deve ser positiva.");
-        }
-
         try {
             $pdo->beginTransaction();
 
-            $sql_update = "UPDATE produtos SET quantidade_estoque = quantidade_estoque + :quantidade WHERE id = :id_produto";
-            $stmt_update = $pdo->prepare($sql_update);
-            $stmt_update->execute([
-                ':quantidade' => $quantidade,
-                ':id_produto' => $idProduto
-            ]);
+            $produto = self::findById($pdo, $id);
+            if (!$produto) {
+                throw new Exception("Produto não encontrado.");
+            }
+            $nomeProduto = $produto['nome'];
 
-            $sql_mov = "INSERT INTO movimentacao_estoque (id_produto, tipo_movimentacao, quantidade, observacao) VALUES (:id_produto, 'ENTRADA', :quantidade, :observacao)";
-            $stmt_mov = $pdo->prepare($sql_mov);
-            $stmt_mov->execute([
-                ':id_produto' => $idProduto,
-                ':quantidade' => $quantidade,
-                ':observacao' => $motivo
-            ]);
+            // Verifica se o produto está em alguma venda
+            $sqlCheckVendas = "SELECT COUNT(*) FROM itens_venda WHERE id_produto = :id";
+            $stmtCheckVendas = $pdo->prepare($sqlCheckVendas);
+            $stmtCheckVendas->execute([':id' => $id]);
+            if ($stmtCheckVendas->fetchColumn() > 0) {
+                throw new Exception("Não é possível excluir este produto, pois ele está associado a vendas existentes.");
+            }
+
+            // Apaga o histórico de movimentação deste produto
+            $sqlDeleteMov = "DELETE FROM movimentacao_estoque WHERE id_produto = :id";
+            $stmtDeleteMov = $pdo->prepare($sqlDeleteMov);
+            $stmtDeleteMov->execute([':id' => $id]);
+
+            // Apaga as imagens do servidor
+            $pastaUpload = __DIR__ . '/../../../public/uploads/produtos/';
+            for ($i = 1; $i <= 3; $i++) {
+                $imagem = $produto['imagem' . $i];
+                if ($imagem && file_exists($pastaUpload . $imagem)) {
+                    unlink($pastaUpload . $imagem);
+                }
+            }
+
+            // Apaga o produto
+            $sqlDeleteProd = "DELETE FROM produtos WHERE id = :id";
+            $stmtDeleteProd = $pdo->prepare($sqlDeleteProd);
+            $stmtDeleteProd->execute([':id' => $id]);
 
             $pdo->commit();
-            return true;
+            return $nomeProduto;
+
         } catch (Exception $e) {
             $pdo->rollBack();
-            error_log("Erro ao adicionar estoque: " . $e->getMessage());
-            throw new Exception("Não foi possível adicionar o estoque.");
+            throw new Exception("Erro ao excluir o produto: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Lista todos os produtos.
+     */
+    public static function listarTodos(PDO $pdo): array
+    {
+        $sql = "SELECT p.*, c.nome AS nome_categoria FROM produtos p 
+                LEFT JOIN categorias c ON p.id_categoria = c.id 
+                ORDER BY p.nome ASC";
+        $stmt = $pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Busca um produto pelo ID.
+     */
+    public static function findById(PDO $pdo, int $id): ?array
+    {
+        $sql = "SELECT * FROM produtos WHERE id = :id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    
+    /**
+     * Busca produtos por um termo para a Frente de Caixa.
+     */
+    public static function buscarPorTermo(PDO $pdo, string $termo): array
+    {
+        $termoBusca = '%' . $termo . '%';
+        $sql = "SELECT id, nome, preco_venda, quantidade_estoque FROM produtos 
+                WHERE nome LIKE :termo AND quantidade_estoque > 0 LIMIT 10";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':termo' => $termoBusca]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Adiciona estoque a um produto.
+     */
+    public static function adicionarEstoque(PDO $pdo, int $id_produto, int $quantidade, string $observacao)
+    {
+        if ($quantidade <= 0) {
+            throw new Exception("A quantidade deve ser positiva.");
+        }
+        try {
+            $pdo->beginTransaction();
+
+            $sqlEstoque = "UPDATE produtos SET quantidade_estoque = quantidade_estoque + :quantidade WHERE id = :id_produto";
+            $stmtEstoque = $pdo->prepare($sqlEstoque);
+            $stmtEstoque->execute([':quantidade' => $quantidade, ':id_produto' => $id_produto]);
+
+            $sqlMov = "INSERT INTO movimentacao_estoque (id_produto, tipo_movimentacao, quantidade, observacao) 
+                       VALUES (:id_produto, 'ENTRADA', :quantidade, :observacao)";
+            $stmtMov = $pdo->prepare($sqlMov);
+            $stmtMov->execute([':id_produto' => $id_produto, ':quantidade' => $quantidade, ':observacao' => $observacao]);
+
+            $pdo->commit();
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            throw new Exception("Erro ao adicionar estoque: " . $e->getMessage());
         }
     }
 }

@@ -66,10 +66,6 @@ session_start();
                         <span class="text-gray-600">Subtotal</span>
                         <span id="subtotal" class="font-semibold">R$ 0,00</span>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Descontos</span>
-                        <span id="descontos" class="font-semibold">R$ 0,00</span>
-                    </div>
                     <div class="flex justify-between text-2xl font-bold text-gray-900 border-t pt-4">
                         <span>Total</span>
                         <span id="total">R$ 0,00</span>
@@ -96,7 +92,6 @@ session_start();
         </div>
     </div>
 
-
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchProduto');
@@ -106,21 +101,15 @@ session_start();
         const finalizeVendaBtn = document.getElementById('finalizeVendaBtn');
         let cart = [];
 
-        // BUSCA DE PRODUTOS
         searchInput.addEventListener('keyup', async (e) => {
             const term = e.target.value;
-
             if (term.length < 2) {
                 searchResults.classList.add('hidden');
                 return;
             }
-
             try {
-                // O caminho aqui é crucial. Partindo de /public/Vendas/ para /App/Ajax/
                 const response = await fetch(`../../App/Ajax/buscar_produtos.php?term=${encodeURIComponent(term)}`);
-                if (!response.ok) {
-                    throw new Error(`Erro na rede: ${response.statusText}`);
-                }
+                if (!response.ok) throw new Error(`Erro na rede: ${response.statusText}`);
                 const products = await response.json();
 
                 searchResults.innerHTML = '';
@@ -145,11 +134,9 @@ session_start();
             }
         });
 
-        // Adicionar produto ao carrinho
         function addProductToCart(product) {
             searchInput.value = '';
             searchResults.classList.add('hidden');
-
             const existingItem = cart.find(item => item.id === product.id);
             if (existingItem) {
                 if(existingItem.quantidade < product.quantidade_estoque){
@@ -167,7 +154,6 @@ session_start();
             renderCart();
         }
 
-        // Renderizar o carrinho
         function renderCart() {
             cartItems.innerHTML = '';
             if (cart.length === 0) {
@@ -198,7 +184,6 @@ session_start();
             updateSummary();
         }
 
-        // Atualizar resumo da venda
         function updateSummary() {
             const total = cart.reduce((sum, item) => sum + (item.quantidade * item.preco_venda), 0);
             document.getElementById('subtotal').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
@@ -206,7 +191,6 @@ session_start();
             finalizeVendaBtn.disabled = cart.length === 0;
         }
 
-        // Funções globais para os botões do carrinho
         window.updateQuantity = (index, change) => {
             const item = cart[index];
             const newQuantity = item.quantidade + change;
@@ -225,15 +209,9 @@ session_start();
             renderCart();
         };
 
-        // Finalizar a venda
         finalizeVendaBtn.addEventListener('click', async () => {
             if (cart.length === 0) return;
-            
             const total = cart.reduce((sum, item) => sum + (item.quantidade * item.preco_venda), 0);
-            
-            // --- CORREÇÃO IMPORTANTE AQUI ---
-            // Adicionamos 'preco_venda: item.preco_venda' para garantir que o preço de cada item
-            // é enviado para o backend, resolvendo o erro.
             const dataToSend = {
                 carrinho: cart.map(item => ({ 
                     id: item.id, 
@@ -264,7 +242,6 @@ session_start();
             }
         });
 
-        // Funções do Modal de Feedback
         const feedbackModal = document.getElementById('feedbackModal');
         const modalIcon = document.getElementById('modalIcon');
         const modalTitle = document.getElementById('modalTitle');
@@ -273,14 +250,11 @@ session_start();
         function showModal(type, title, message) {
             modalTitle.innerText = title;
             modalMessage.innerText = message;
-            if (type === 'success') {
-                modalIcon.innerHTML = `<i class="fas fa-check-circle fa-3x text-green-500"></i>`;
-            } else {
-                modalIcon.innerHTML = `<i class="fas fa-times-circle fa-3x text-red-500"></i>`;
-            }
+            modalIcon.innerHTML = (type === 'success') 
+                ? `<i class="fas fa-check-circle fa-3x text-green-500"></i>`
+                : `<i class="fas fa-times-circle fa-3x text-red-500"></i>`;
             feedbackModal.classList.remove('hidden');
         }
-
         window.closeModal = () => {
             feedbackModal.classList.add('hidden');
         }
